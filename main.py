@@ -183,7 +183,7 @@ def longest_streak():
     habit_list = logic.habit_list_creator('longest_streak', True) 
     print(tabulate(habit_list, headers='firstrow', tablefmt='github'))
     
-    print(f"    The longest streak is achieved from habit '{habit_list[0][1]}' and is {habit_list[0][11]} days in a row! It was broken {habit_list[0][13]} times.")        
+    print(f"    The longest streak is achieved from habit '{habit_list[0][1]}' and is {habit_list[11][1]} days in a row! It was broken {habit_list[13][1]} times.")        
 
 # get a list of habits sorted by the total time wasted from high to low 
 @analyzation.command()
@@ -194,6 +194,7 @@ def time_cost():
     print(f"    The highest time cosumption is {habit_list[5][1]} minutes from habit '{habit_list[0][1]}'")
 
 # get a list of habits sorted by the total cost from high to low 
+@analyzation.command()
 def cost():
     """show total cost"""
     habit_list = logic.habit_list_creator('total_cost', True)
