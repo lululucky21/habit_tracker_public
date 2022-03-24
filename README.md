@@ -57,7 +57,8 @@ At the first level of this application the command groups are set and at the sec
 
 ***
 
-####Following you can find code examples to understand the workflow:
+Following you can find code examples to understand the workflow:
+----
 
 Creating a new habit and storing it in the database:
 
