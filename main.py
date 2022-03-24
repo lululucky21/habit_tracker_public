@@ -206,20 +206,9 @@ def cost():
 @actual_state.command()
 def test_function(): 
     """test function"""
-
-    # break habit function umschreiben; reset anders designen
-
-    #was muss ich was anpasssen mit den zwei neuen variablen? wo assigne ich longest streak variable?
     
-    #jetzt weitere punkte hier abarbeiten, sollte angepasst sein, Datenbank updaten und ausprobieren!
-
-
     # function schreiben: muss ich mich heute noch um habits kümmern opder erledigt
     
-    # next step, wenn prg mit neuen variablen läuft wenn habit vorbei testen was passiert mit test variable von db
-
-
-
 if __name__ == '__main__':
     cli()
 
