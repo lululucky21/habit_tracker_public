@@ -38,7 +38,7 @@ def create(name, cost, time_wasted, goal, iterations):
     interface.add_habit(habit)
     print(f"    The habit '{name}' has been added to the database!")
 
-# checkout predefined habit and directly update goal, time cost and total cost >>>>>> ich glaube message ist noch nicht getestet!, sollte so passen!!!!
+# checkout predefined habit and directly update goal, time cost and total cost
 @manage_habits.command()
 @click.option('--cli_name',prompt='    type in the name of the habit you want to checkout')
 @click.option('--count', prompt='    type in the times you want to checkout the habit')
@@ -56,11 +56,10 @@ def checkout(cli_name, count):
         if goal == 0:
             message = logic.statistics(name)
             print(message)
-            #print(f"Congratulations! Goal reached for the habit '{name}' and goal has been checked out!")      das rausnehmen, wenn alles soweit funktioniert!
         elif goal < 0:
             print(f"\n    Your habit '{name}' is already reached since {-(goal)} checkouts!\n    Please change your goal or reset habit.")
 
-# break a habit ------>>>>>> die hier muss RICHTIG ANGEPASST werden!!!!!! --> break hinzufügen
+# break a habit
 @manage_habits.command()
 @click.option('--name',prompt='    type in the name of the habit you have broken')
 @click.option('--option',prompt='    type in "delete" to delete the habit or "reset" for resetting or "break" to continue')
@@ -100,12 +99,12 @@ def delete(name):
     else:
         print(f"    The habit '{name}' has not been deleted!")
 
-# changing an attribute of habit ---->>>> Anpassungen überprüfen! sollte so funktionieren!
+# changing an attribute of habit
 @manage_habits.command()
 @click.option('--name', prompt='    type in the name of the habit on which you want to modify an attribute'
               '\n    (you can view the current habits with the get-habit-list function)')
 @click.option('--attribute', prompt='    type in the name of the attribute you want to change.' 
-              '\n    (changeable attributes are "name, start_time, daily_cost, time_wasted, general_goal and daily_iter")') 
+              '\n    (changeable attributes are "name, daily_cost, time_wasted, general_goal and daily_iter")') 
 @click.option('--value', prompt='    type in the value you want to assign to the attribute')
 def change_attribute(name, attribute, value):
     """change attribute of habit"""
@@ -113,7 +112,7 @@ def change_attribute(name, attribute, value):
         print("Please checkout your habit within the checkout function!")
     elif attribute in [
         "total_cost", "total_time_cost", "days_remaining", "last_checkout_time", 
-        "longest_streak", "date_broken", "broken_counter", "total_checkout"
+        "longest_streak", "date_broken", "broken_counter", "total_checkout", "start_time"
         ]:
         print("You cannot change this attribute!")
     else:
@@ -143,19 +142,30 @@ def get_habit(name):
     attribute_list = interface.get_habit(name)
     print(tabulate(attribute_list, headers='firstrow', tablefmt='github'))
     
-# calculate checkout state of each habit -----_>>>>>> sollte so hoffentlich angepasst funktionieren mit neuen Variablen, noch nicht ganz sicher, ausführlich testen!!!!
+# calculate checkout state of each habit 
 @actual_state.command()
 def checkout_state():
     """calculate checkout state of each habit"""
-    end_date, days_remaining, names = logic.calculate_checkout_state()
-    actual_time = datetime.now()
+    expected_end, days_remaining, names = logic.calculate_checkout_state()  
     
-    for end, remaining, name in zip(end_date, days_remaining, names):
-        if end.date() - actual_time.date() < timedelta(days=remaining):
-            print(f"    Please manage your checkouts for habit '{name}' or call break habit function from CLI")
-        elif end.date() - actual_time.date() > timedelta(days=remaining) + timedelta(days=1):
-            print(f"    You've checked out an event in the future of habit '{name}'." 
-                 "\n    This message is shown if habit was checked out more than one day in the future. Please review your habits!")
+    for e_end, remaining, name in zip(expected_end, days_remaining, names):
+        real_end = datetime.now() + timedelta(days=remaining)
+        if (real_end - e_end).days < 3:
+            difference = round((real_end - e_end).total_seconds()/3600, 2)
+            unit = "hours"
+        else:
+            difference = (real_end - e_end).days
+            unit = "days"
+         
+        if real_end > e_end + timedelta(hours=6) and remaining > 0:
+            print(f"\n    Please manage your checkouts for habit '{name}' or call break habit function from CLI. You are {difference} {unit} behind.")
+        elif real_end < e_end - timedelta(hours=12): 
+            print(f"\n    You've checked out an event in the future of habit '{name}'. You are {-difference} {unit} ahead. Please review your habits!")    
+        elif remaining < 0:
+            print(f"\n    You've checked out an event of habit '{name}' which has reached its goal. You are {-remaining} days ahead. Please review your habits!")
+        else:
+            print(f"\n    Your habit '{name}' is up to date.")
+    print("\n")
 
 
 # analyzation commands
@@ -167,16 +177,16 @@ def closest_goal():
     print(tabulate(habit_list, headers='firstrow', tablefmt='github'))
     print(f"    The closest goal is reached in {habit_list[7][1]} days from habit '{habit_list[0][1]}'")
 
-# show the current streaks of all habits -------_>>>>>> testen!!!!!!!   sollte so hoffentlich funktionieren!
+# show the current streaks of all habits
 @analyzation.command() 
 def current_streaks():
     """show current streaks"""
     names, streaks = logic.calculate_current_streaks()
     
-    for n, s in zip(names, streaks):                 # ------_>>>>>>>> muss ich das zippen oder geht das auch so? Testen!
+    for n, s in zip(names, streaks):               
         print(f"    The current streak from habit '{n}' is {s} days!")
 
-# get a list of habits sorted by the longest streak ------_>>>>>>>>>> testen!"!!!"   sollte hoffentlich so funktionieren!
+# get a list of habits sorted by the longest streak 
 @analyzation.command()
 def longest_streak():
     """show longest streak"""
@@ -191,7 +201,8 @@ def time_cost():
     """show total time cost"""
     habit_list = logic.habit_list_creator('total_time_cost', True)
     print(tabulate(habit_list, headers='firstrow', tablefmt='github'))
-    print(f"    The highest time cosumption is {habit_list[5][1]} minutes from habit '{habit_list[0][1]}'")
+    consumption_h = round(habit_list[5][1] / 60, 2)
+    print(f"    The highest time cosumption is {consumption_h} hours from habit '{habit_list[0][1]}'")
 
 # get a list of habits sorted by the total cost from high to low 
 @analyzation.command()
@@ -202,12 +213,6 @@ def cost():
     print(f"    The highest total cost is {habit_list[3][1]} Euros from habit '{habit_list[0][1]}'")
 
 
-# test-function for logic --> needs to be deleted!!
-@actual_state.command()
-def test_function(): 
-    """test function"""
-    
-    # function schreiben: muss ich mich heute noch um habits kümmern opder erledigt
     
 if __name__ == '__main__':
     cli()

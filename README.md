@@ -75,3 +75,7 @@ Show current streaks of habits in the database:
 Showing a list of all habits stored in the database:
 
 > ``python3 main.py actual-state get-all-habits`` 
+
+For testing the program use the chain test provided inside the repository:
+
+> ``python3 test_project.py``

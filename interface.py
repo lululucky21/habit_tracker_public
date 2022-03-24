@@ -21,10 +21,10 @@ class Habit(Base):
         daily_iter = Column('daily iterations', Integer)
         checkout_counter = Column('checkout', Integer) 
         last_checkout_time = Column('last checkout time', String)
-        longest_streak = Column('longest streak (days)', Integer) #-->>>>>>> zu testen
-        date_broken = Column('last time broken', String) #-->>>>>>>>>>> zu testen!
-        broken_counter = Column('times broken', Integer) # ---->>>>> zu testen"!
-        total_checkout = Column('total checkout counter', Integer) # ---->>>> zu testen (um alle checkouts hochzuzählen, auch wenn habit gebrochen), nur intern nciht in listen ausgeben
+        longest_streak = Column('longest streak (days)', Integer) 
+        date_broken = Column('last time broken', String)
+        broken_counter = Column('times broken', Integer)
+        total_checkout = Column('total checkout counter', Integer)
         
 
         def __init__(self, name, start_time, daily_cost, time_wasted, general_goal, daily_iter):
@@ -40,7 +40,7 @@ class Habit(Base):
             self.checkout_counter = 0
             self.last_checkout_time = "not checked out" # overwritten by checkout time
             self.longest_streak = 0
-            self.date_broken = "not broken"
+            self.date_broken = "not broken" # overwritten by time habit was broken
             self.broken_counter = 0
             self.total_checkout = 0
 
@@ -71,22 +71,25 @@ def get_habits():
     habits = session.query(Habit).all() 
     return habits
 
-# checkout predefined habit -------_>>>>>>>>>> prüfen!!!!
+#get a single habit (as object) stored in db
+def get_single_habit(habit_name):
+    habit = session.query(Habit).filter(Habit.name==habit_name).first() 
+    return habit
+
+# checkout predefined habit 
 def checkout_habit(habit_name, count):
     habit = session.query(Habit).filter(Habit.name == habit_name).first()
     habit.checkout_counter += count
     habit.last_checkout_time = datetime.strftime(datetime.now(), '%y-%m-%d %H:%M:%S')
     habit.total_checkout += count
-    
-    #sollte so funktionienren! Prüfen! 
+     
     actual_streak = habit.checkout_counter / habit.daily_iter
     if habit.longest_streak < actual_streak:       
         habit.longest_streak = actual_streak
     
     session.commit()
     
-# break habit function u.a. zum updaten von longest streak ->>>>>>>> !!!!! 
-# schauen, wie das so funktioniert; Sachen die checkout counter zur Analyse benutzen anpassen! ------>>>>> fehlen hier noch Variablen?
+# break habit function 
 def break_habit(habit_name):
     habit = session.query(Habit).filter(Habit.name == habit_name).first()
     habit.date_broken = datetime.strftime(datetime.now(), '%y-%m-%d %H:%M:%S')
@@ -125,17 +128,27 @@ def change_attribute(habit_name, attribute, value):
        
 # get values of specific habit stored in db 
 def get_habit(habit_name):
-    habit = session.query(Habit).filter(Habit.name==habit_name).first()                                                                                                                                                                                                     
+    habit = session.query(Habit).filter(Habit.name==habit_name).first()   
+    name = ["Habit Name:", habit.name]
+    start_time = ["Start Time", habit.start_time]    
+    daily_cost = ["Daily Cost:", habit.daily_cost]
+    total_cost = ["Total Cost:", habit.total_cost]
+    time_wasted = ["Time Wasted:", habit.time_wasted]
+    total_time_cost = ["Total Time Cost:", habit.total_time_cost]
+    general_goal = ["General Goal:", habit.general_goal]
+    days_remaining = ["Days Remaining:", habit.days_remaining]
+    daily_iter = ["Daily Iterations:", habit.daily_iter]
+    checkout_counter = ["Checkout:", habit.checkout_counter]
+    last_checkout_time = ["Last Checkout:", habit.last_checkout_time]
+    longest_streak = ["Longest Streak:", habit.longest_streak]
+    date_broken = ["Last Time Broken:", habit.date_broken]
+    broken_counter = ["Times Broken:", habit.broken_counter]
+  
     attribute_list = [
-        ["Habit Name:", habit.name], ["Start Time:", habit.start_time], ["Daily Cost:", habit.daily_cost], ["Total Cost:", habit.total_cost]
-        ["Time Wasted:", habit.time_wasted], ["Total Time Cost:", habit.total_time_cost],["General Goal:", habit.general_goal], ["Days Remaining:", habit.days_remaining], 
-        ["Daily Iterations:", habit.daily_iter], ["Checkout:", habit.checkout_counter], ["Last Checkout:", habit.last_checkout_time],
-        ["Longest Streak:", habit.longest_streak], ["Last Time Broken:", habit.date_broken], ["Times Broken:", habit.broken_counter]
-        ]
+        name, start_time,daily_cost, total_cost, time_wasted, total_time_cost, 
+        general_goal, days_remaining, daily_iter, checkout_counter, last_checkout_time,
+        longest_streak, date_broken, broken_counter
+        ]    
+    
     return attribute_list
 
-#ggf. function get habit anpassen von obendrüber, in jedem Fall nach oben sortieren!
-#get a single habit (as object) stored in db
-def get_single_habit(habit_name):
-    habit = session.query(Habit).filter(Habit.name==habit_name).first() 
-    return habit
