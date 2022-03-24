@@ -32,13 +32,13 @@ At the first level of this application the command groups are set and at the sec
 > > 
 > > ``manage-habits``
 
-> __Second Level ``actual-state``:__
+> __Second Level *actual-state*:__
 > -----
 > > ``checkout-state`` 
 > > ``get-all-habits`` 
 > > ``get-habit``
 
-> __Second Level ``analyzation``:__
+> __Second Level *analyzation*:__
 > -----
 > > ``closest-goal``
 > > ``cost``
@@ -46,7 +46,7 @@ At the first level of this application the command groups are set and at the sec
 > > ``longest-streak``
 > > ``time-cost``
 
-> __Second Level ``manage-habits``:__
+> __Second Level *manage-habits*:__
 > -----
 > > ``break-habit``
 > > ``change-attribute``
